@@ -29,17 +29,28 @@ async function sendMail({ to, subject, html }) {
   });
 }
 
+const PAIR_COLORS = {
+  'XAU/USD': '#e8a317',
+  'USTEC':   '#2952e3',
+  'EUR/USD': '#6c4fd6',
+  'GBP/USD': '#d6336c',
+  'USD/JPY': '#0ea5a5',
+  'BTC/USD': '#f7931a',
+  'ETH/USD': '#6b5ce0',
+};
+
 function signalEmailHtml(signal) {
   const dir = signal.direction.toUpperCase();
-  const color = dir === 'BUY' ? '#0f9d58' : '#e63946';
+  const dirColor = dir === 'BUY' ? '#0f9d58' : '#e63946';
+  const pairColor = PAIR_COLORS[signal.instrument] || '#14110f';
   return `
   <div style="font-family: -apple-system, Helvetica, Arial, sans-serif; max-width: 480px; margin: 0 auto;">
-    <div style="background:#14110f; padding: 20px 24px; border-radius: 12px 12px 0 0;">
-      <span style="color:#e8a317; font-family: monospace; font-size: 12px; letter-spacing: 1px;">GOLDWIRE SIGNAL</span>
+    <div style="background:#14110f; padding: 20px 24px; border-radius: 12px 12px 0 0; border-bottom: 3px solid ${pairColor};">
+      <span style="color:${pairColor}; font-family: monospace; font-size: 12px; letter-spacing: 1px;">GOLDWIRE SIGNAL</span>
     </div>
     <div style="border: 2px solid #14110f; border-top: none; border-radius: 0 0 12px 12px; padding: 24px;">
       <h2 style="margin: 0 0 4px; font-size: 22px;">
-        ${signal.instrument} <span style="color:${color};">${dir}</span>
+        <span style="color:${pairColor};">${signal.instrument}</span> <span style="color:${dirColor};">${dir}</span>
       </h2>
       <table style="width:100%; margin-top: 16px; font-size: 14px; border-collapse: collapse;">
         <tr><td style="padding:6px 0; color:#666;">Entry</td><td style="padding:6px 0; text-align:right; font-family:monospace;">${signal.entry}</td></tr>
@@ -48,7 +59,7 @@ function signalEmailHtml(signal) {
       </table>
       ${signal.note ? `<p style="margin-top:16px; font-size:13.5px; color:#444;">${signal.note}</p>` : ''}
       <p style="margin-top:20px; font-size:11.5px; color:#999; line-height:1.5;">
-        Not financial advice. Trading gold and index CFDs carries a high level of risk. Only trade with capital you can afford to lose.
+        Not financial advice. Trading gold, forex, index CFDs, and crypto-assets carries a high level of risk. Only trade with capital you can afford to lose.
       </p>
     </div>
   </div>`;

@@ -10,7 +10,7 @@ const signalsRouter = require('./routes/signals');
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-app.use(cors()); // in production, restrict origin to your Netlify domain
+app.use(cors({ origin: 'https://goldwire.netlify.app' }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 

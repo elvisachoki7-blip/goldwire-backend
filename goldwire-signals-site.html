@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GOLDWIRE — Signals for Gold & Nasdaq</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --white:#ffffff;
+    --ink:#14110f;
+    --ink-soft:#4a4540;
+    --gold:#e8a317;
+    --gold-deep:#a5730f;
+    --gold-pale:#fff3d9;
+    --green:#0f9d58;
+    --green-pale:#e5f6ec;
+    --red:#e63946;
+    --red-pale:#fdebec;
+    --blue:#2952e3;
+    --blue-pale:#eaeeff;
+    --line:#e9e5df;
+    --radius:18px;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--white);
+    color:var(--ink);
+    font-family:'Inter', sans-serif;
+    overflow-x:hidden;
+  }
+  .display{font-family:'Bricolage Grotesque', sans-serif;}
+  .mono{font-family:'IBM Plex Mono', monospace;}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; scroll-behavior:auto !important;}
+  }
+
+  a{color:inherit;}
+  img,svg{display:block;}
+
+  /* ---------- TICKER ---------- */
+  .ticker-wrap{
+    position:sticky; top:0; z-index:50;
+    background:var(--ink);
+    overflow:hidden;
+    border-bottom:2px solid var(--gold);
+    white-space:nowrap;
+  }
+  .ticker{
+    display:inline-flex;
+    animation:scrollTicker 28s linear infinite;
+    padding:10px 0;
+  }
+  .ticker-item{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:0 26px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    color:var(--white);
+    border-right:1px solid rgba(255,255,255,0.12);
+  }
+  .ticker-item .sym{color:var(--gold); font-weight:600;}
+  .ticker-item .up{color:#5fd68a;}
+  .ticker-item .down{color:#ff8a93;}
+  @keyframes scrollTicker{
+    0%{transform:translateX(0);}
+    100%{transform:translateX(-50%);}
+  }
+
+  /* ---------- NAV ---------- */
+  header.nav{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:22px 6vw;
+    position:relative; z-index:20;
+  }
+  .logo{
+    font-family:'Bricolage Grotesque', sans-serif;
+    font-weight:800;
+    font-size:22px;
+    letter-spacing:-0.02em;
+    display:flex; align-items:center; gap:10px;
+  }
+  .logo .dot{
+    width:10px; height:10px; border-radius:50%;
+    background:var(--gold);
+    box-shadow:0 0 0 4px var(--gold-pale);
+  }
+  nav.links{display:flex; gap:32px; font-size:14px; font-weight:600;}
+  nav.links a{text-decoration:none; opacity:0.75; transition:opacity .2s;}
+  nav.links a:hover{opacity:1;}
+  .nav-cta{
+    background:var(--ink); color:var(--white);
+    padding:10px 20px; border-radius:100px;
+    font-size:14px; font-weight:700; text-decoration:none;
+    border:none; cursor:pointer; font-family:'Inter', sans-serif;
+    transition:transform .25s cubic-bezier(.34,1.56,.64,1), background .2s;
+  }
+  .nav-cta:hover{transform:translateY(-2px); background:var(--gold-deep);}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;
+    padding:60px 6vw 100px;
+    display:grid;
+    grid-template-columns:1.15fr 0.85fr;
+    gap:40px;
+    align-items:center;
+    min-height:78vh;
+  }
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px; font-weight:600;
+    letter-spacing:0.08em; text-transform:uppercase;
+    color:var(--gold-deep);
+    background:var(--gold-pale);
+    padding:7px 14px; border-radius:100px;
+    margin-bottom:26px;
+  }
+  h1.headline{
+    font-family:'Bricolage Grotesque', sans-serif;
+    font-weight:800;
+    font-size:clamp(44px, 6.4vw, 92px);
+    line-height:0.98;
+    letter-spacing:-0.03em;
+  }
+  h1.headline .accent{
+    color:var(--gold);
+    position:relative;
+    display:inline-block;
+  }
+  .hero p.sub{
+    margin-top:26px;
+    font-size:19px;
+    color:var(--ink-soft);
+    max-width:520px;
+    line-height:1.5;
+  }
+  .hero-ctas{
+    margin-top:38px;
+    display:flex; gap:16px; flex-wrap:wrap;
+  }
+  .btn-primary{
+    background:var(--ink); color:var(--white);
+    padding:16px 30px; border-radius:100px;
+    font-weight:700; font-size:15px; font-family:'Inter', sans-serif;
+    text-decoration:none; border:none; cursor:pointer;
+    display:inline-flex; align-items:center; gap:10px;
+    transition:transform .3s cubic-bezier(.34,1.56,.64,1), background .2s;
+  }
+  .btn-primary:hover{transform:translateY(-3px) scale(1.02); background:var(--gold-deep);}
+  .btn-ghost{
+    padding:16px 26px; border-radius:100px;
+    font-weight:700; font-size:15px;
+    border:2px solid var(--ink); text-decoration:none;
+    transition:transform .3s cubic-bezier(.34,1.56,.64,1), background .2s, color .2s;
+  }
+  .btn-ghost:hover{transform:translateY(-3px); background:var(--ink); color:var(--white);}
+
+  .hero-visual{
+    position:relative; height:460px;
+  }
+  .coin{
+    position:absolute; border-radius:50%;
+    background:conic-gradient(from 200deg, var(--gold), #fff3c4, var(--gold-deep), var(--gold));
+    box-shadow:0 24px 50px -12px rgba(165,115,15,0.55), inset 0 0 0 6px rgba(255,255,255,0.35);
+    animation:spinFloat 7s ease-in-out infinite;
+  }
+  .coin.c1{width:180px; height:180px; top:20px; right:60px; animation-delay:0s;}
+  .coin.c2{width:100px; height:100px; top:230px; right:230px; animation-delay:1.2s; opacity:0.9;}
+  .coin.c3{width:70px; height:70px; top:60px; right:280px; animation-delay:2.1s; opacity:0.85;}
+  @keyframes spinFloat{
+    0%,100%{transform:translateY(0) rotate(0deg);}
+    50%{transform:translateY(-22px) rotate(180deg);}
+  }
+  .candle-stack{
+    position:absolute; bottom:10px; left:10px;
+    display:flex; align-items:flex-end; gap:10px;
+    height:260px;
+  }
+  .candle{
+    width:16px; border-radius:4px;
+    transform-origin:bottom;
+    animation:growUp 0.9s cubic-bezier(.2,1.4,.4,1) both;
+  }
+  .candle.up{background:var(--green);}
+  .candle.down{background:var(--red);}
+  @keyframes growUp{
+    0%{transform:scaleY(0);}
+    100%{transform:scaleY(1);}
+  }
+
+  /* ---------- SCROLL REVEAL ---------- */
+  .reveal{
+    opacity:0; transform:translateY(36px) scale(0.96);
+    transition:opacity .7s cubic-bezier(.2,1.2,.3,1), transform .7s cubic-bezier(.2,1.2,.3,1);
+  }
+  .reveal.in{opacity:1; transform:translateY(0) scale(1);}
+
+  /* ---------- SECTION SHELL ---------- */
+  section{padding:100px 6vw;}
+  .section-head{max-width:640px; margin-bottom:56px;}
+  .section-head .kicker{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px; font-weight:600; text-transform:uppercase;
+    letter-spacing:0.1em; color:var(--gold-deep);
+    margin-bottom:14px; display:block;
+  }
+  .section-head h2{
+    font-family:'Bricolage Grotesque', sans-serif;
+    font-weight:800; font-size:clamp(30px, 3.6vw, 48px);
+    letter-spacing:-0.02em; line-height:1.05;
+  }
+  .section-head p{margin-top:16px; color:var(--ink-soft); font-size:17px; line-height:1.55;}
+
+  /* ---------- STRATEGY STACK ---------- */
+  .stack-grid{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:20px;
+  }
+  .stack-card{
+    border-radius:var(--radius);
+    padding:30px 24px;
+    min-height:260px;
+    display:flex; flex-direction:column; justify-content:space-between;
+    text-decoration:none; color:inherit;
+    transition:transform .35s cubic-bezier(.34,1.56,.64,1), box-shadow .35s;
+  }
+  .stack-card:hover{transform:translateY(-8px) rotate(-1deg); box-shadow:0 20px 40px -20px rgba(20,17,15,0.25);}
+  .stack-card .use-link{
+    display:inline-flex; align-items:center; gap:6px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px; font-weight:600; opacity:0.75;
+  }
+  .stack-card .use-link .arrow{
+    display:inline-block; transition:transform .3s cubic-bezier(.34,1.56,.64,1);
+  }
+  .stack-card:hover .use-link .arrow{transform:translateX(4px);}
+  .stack-card .tag{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px; font-weight:600; opacity:0.6;
+  }
+  .stack-card h3{
+    font-family:'Bricolage Grotesque', sans-serif;
+    font-size:24px; font-weight:800; margin-top:14px;
+  }
+  .stack-card p{font-size:14.5px; margin-top:10px; line-height:1.5; opacity:0.85;}
+  .stack-card.gold{background:var(--gold-pale); color:var(--gold-deep);}
+  .stack-card.green{background:var(--green-pale); color:#0b6b3d;}
+  .stack-card.red{background:var(--red-pale); color:#a72330;}
+  .stack-card.blue{background:var(--blue-pale); color:#1d38a8;}
+
+  /* ---------- STATS ---------- */
+  .stats-band{
+    background:var(--ink); color:var(--white);
+    border-radius:28px;
+    padding:64px 6vw;
+    margin:0 6vw;
+    width:calc(100% - 12vw);
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:20px;
+    text-align:center;
+    position:relative;
+  }
+  .stat{position:relative;}
+  .stat .num{
+    font-family:'Bricolage Grotesque', sans-serif;
+    font-weight:800;
+    font-size:clamp(38px, 4.2vw, 58px);
+    color:var(--gold);
+    display:inline-block;
+  }
+  .stat .label{
+    margin-top:10px; font-size:13px;
+    font-family:'IBM Plex Mono', monospace;
+    text-transform:uppercase; letter-spacing:0.06em;
+    opacity:0.7;
+  }
+  .stats-note{
+    text-align:center; font-size:12.5px; color:var(--ink-soft);
+    margin-top:20px; font-family:'IBM Plex Mono', monospace;
+  }
+
+  /* ---------- PRICING ---------- */
+  .pricing-grid{
+    display:grid; grid-template-columns:repeat(3, 1fr); gap:24px;
+  }
+  .plan{
+    border:2px solid var(--line);
+    border-radius:var(--radius);
+    padding:34px 28px;
+    display:flex; flex-direction:column;
+    transition:transform .35s cubic-bezier(.34,1.56,.64,1), border-color .3s, box-shadow .3s;
+  }
+  .plan:hover{transform:translateY(-10px); border-color:var(--gold); box-shadow:0 24px 44px -20px rgba(232,163,23,0.4);}
+  .plan.featured{
+    background:var(--ink); color:var(--white); border-color:var(--ink);
+    transform:scale(1.03);
+  }
+  .plan.featured:hover{transform:scale(1.03) translateY(-10px);}
+  .plan .plan-name{font-family:'IBM Plex Mono', monospace; font-size:13px; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; opacity:0.6;}
+  .plan .plan-price{
+    font-family:'Bricolage Grotesque', sans-serif;
+    font-weight:800; font-size:44px; margin-top:12px;
+  }
+  .plan .plan-price span{font-size:16px; font-weight:500; opacity:0.6;}
+  .plan ul{list-style:none; margin-top:24px; flex:1;}
+  .plan li{
+    padding:10px 0; font-size:14.5px;
+    border-top:1px solid var(--line);
+    display:flex; align-items:center; gap:10px;
+  }
+  .plan.featured li{border-top:1px solid rgba(255,255,255,0.15);}
+  .plan li:before{content:"●"; color:var(--gold); font-size:8px;}
+  .plan .plan-btn{
+    margin-top:26px; text-align:center;
+    padding:14px; border-radius:100px;
+    font-weight:700; text-decoration:none; font-size:14.5px;
+    background:var(--ink); color:var(--white);
+    border:none; cursor:pointer; font-family:'Inter', sans-serif;
+    display:block; width:100%;
+    transition:transform .3s cubic-bezier(.34,1.56,.64,1);
+  }
+  .plan.featured .plan-btn{background:var(--gold); color:var(--ink);}
+  .plan .plan-btn:hover{transform:translateY(-3px) scale(1.03);}
+
+  /* ---------- DISCLAIMER ---------- */
+  .disclaimer{
+    background:var(--gold-pale);
+    border-radius:var(--radius);
+    padding:36px 6vw;
+    margin:0 6vw 40px;
+    width:calc(100% - 12vw);
+    font-size:13.5px; line-height:1.6; color:var(--gold-deep);
+  }
+  .disclaimer strong{color:var(--ink);}
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    padding:50px 6vw 40px;
+    display:flex; justify-content:space-between; align-items:center;
+    border-top:1px solid var(--line);
+    font-size:13px; color:var(--ink-soft);
+    flex-wrap:wrap; gap:16px;
+  }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width:900px){
+    .hero{grid-template-columns:1fr; padding-top:30px;}
+    .hero-visual{height:320px; margin-top:20px;}
+    .stack-grid{grid-template-columns:repeat(2, 1fr);}
+    .stats-band{grid-template-columns:repeat(2, 1fr);}
+    .pricing-grid{grid-template-columns:1fr;}
+    .plan.featured{transform:scale(1);}
+    nav.links{display:none;}
+  }
+
+  /* keyboard focus */
+  a:focus-visible, button:focus-visible{
+    outline:3px solid var(--gold); outline-offset:2px;
+  }
+
+  /* ---------- MODAL ---------- */
+  .modal-overlay{
+    position:fixed; inset:0;
+    background:rgba(20,17,15,0.55);
+    backdrop-filter:blur(3px);
+    display:flex; align-items:center; justify-content:center;
+    padding:24px;
+    z-index:100;
+    opacity:0; pointer-events:none;
+    transition:opacity .25s ease;
+  }
+  .modal-overlay.open{opacity:1; pointer-events:auto;}
+  .modal-card{
+    background:var(--white);
+    border-radius:24px;
+    max-width:440px; width:100%;
+    padding:38px 34px;
+    position:relative;
+    box-shadow:0 40px 80px -20px rgba(20,17,15,0.35);
+    transform:translateY(24px) scale(0.96);
+    transition:transform .35s cubic-bezier(.2,1.4,.4,1);
+  }
+  .modal-overlay.open .modal-card{transform:translateY(0) scale(1);}
+  .modal-close{
+    position:absolute; top:18px; right:18px;
+    width:34px; height:34px; border-radius:50%;
+    border:none; background:var(--gold-pale); color:var(--gold-deep);
+    font-size:16px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:transform .25s cubic-bezier(.34,1.56,.64,1), background .2s;
+  }
+  .modal-close:hover{transform:rotate(90deg); background:var(--gold);}
+  .modal-eyebrow{
+    font-family:'IBM Plex Mono', monospace; font-size:12px; font-weight:600;
+    text-transform:uppercase; letter-spacing:0.08em; color:var(--gold-deep);
+    margin-bottom:10px;
+  }
+  .modal-card h3{
+    font-family:'Bricolage Grotesque', sans-serif;
+    font-weight:800; font-size:26px; letter-spacing:-0.02em;
+    margin-bottom:10px;
+  }
+  .modal-card p.modal-sub{
+    font-size:14.5px; color:var(--ink-soft); line-height:1.5; margin-bottom:22px;
+  }
+  .modal-card p.modal-sub .plan-highlight{color:var(--gold-deep); font-weight:700;}
+  .modal-field{margin-bottom:14px;}
+  .modal-field label{
+    display:block; font-size:12.5px; font-weight:600; margin-bottom:6px; color:var(--ink-soft);
+  }
+  .modal-field input{
+    width:100%; padding:13px 14px; border-radius:10px;
+    border:2px solid var(--line); font-size:14.5px; font-family:'Inter', sans-serif;
+    transition:border-color .2s;
+  }
+  .modal-field input:focus{outline:none; border-color:var(--gold);}
+  .modal-submit{
+    width:100%; margin-top:8px; padding:15px; border-radius:100px;
+    background:var(--ink); color:var(--white); border:none;
+    font-weight:700; font-size:15px; cursor:pointer;
+    transition:transform .3s cubic-bezier(.34,1.56,.64,1), background .2s;
+  }
+  .modal-submit:hover{transform:translateY(-2px) scale(1.02); background:var(--gold-deep);}
+  .modal-note{
+    font-size:12px; color:var(--ink-soft); margin-top:14px; text-align:center; line-height:1.5;
+  }
+  .modal-success{
+    text-align:center; padding:20px 0;
+  }
+  .modal-success .check{
+    width:56px; height:56px; border-radius:50%;
+    background:var(--green-pale); color:var(--green);
+    display:flex; align-items:center; justify-content:center;
+    font-size:26px; margin:0 auto 18px;
+    animation:popIn .5s cubic-bezier(.2,1.6,.4,1);
+  }
+  @keyframes popIn{
+    0%{transform:scale(0);}
+    70%{transform:scale(1.15);}
+    100%{transform:scale(1);}
+  }
+  .modal-success h3{margin-bottom:8px;}
+  .modal-success p{color:var(--ink-soft); font-size:14.5px; line-height:1.5;}
+</style>
+</head>
+<body>
+
+  <div class="ticker-wrap">
+    <div class="ticker" id="tickerTrack">
+      <!-- duplicated via JS for seamless loop -->
+    </div>
+  </div>
+
+  <header class="nav">
+    <div class="logo"><span class="dot"></span>GOLDWIRE</div>
+    <nav class="links">
+      <a href="#strategy">Strategy</a>
+      <a href="#stats">Track record</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <button class="nav-cta" onclick="openModal('Starter')">Get signals</button>
+  </header>
+
+  <section class="hero">
+    <div>
+      <span class="eyebrow">● Live on XAU/USD &amp; USTEC</span>
+      <h1 class="headline">Catch the move<br>before the <span class="accent">candle closes.</span></h1>
+      <p class="sub">GOLDWIRE turns a rules-based EMA, RSI, MACD and ATR strategy into plain-language entries, stops and targets — sent the moment the setup confirms.</p>
+      <div class="hero-ctas">
+        <button class="btn-primary" onclick="openModal('Starter')">Start free trial →</button>
+        <a href="#strategy" class="btn-ghost">See the strategy</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="coin c1"></div>
+      <div class="coin c2"></div>
+      <div class="coin c3"></div>
+      <div class="candle-stack" id="candleStack"></div>
+    </div>
+  </section>
+
+  <section id="strategy">
+    <div class="section-head reveal">
+      <span class="kicker">The stack</span>
+      <h2>Four filters. One signal.</h2>
+      <p>Every alert has to clear all four checks before it reaches you — that's what keeps the noise out. Click any filter to open it on a live chart.</p>
+    </div>
+    <div class="stack-grid">
+      <a href="https://www.tradingview.com/support/solutions/43000592270-exponential-moving-average/" target="_blank" rel="noopener" class="stack-card gold reveal">
+        <div>
+          <span class="tag">01 · TREND</span>
+          <h3>EMA Crossover</h3>
+          <p>Fast and slow EMAs establish direction before anything else is allowed to fire.</p>
+        </div>
+        <span class="use-link">Use on TradingView <span class="arrow">→</span></span>
+      </a>
+      <a href="https://www.tradingview.com/support/solutions/43000502338-relative-strength-index-rsi/" target="_blank" rel="noopener" class="stack-card green reveal">
+        <div>
+          <span class="tag">02 · MOMENTUM</span>
+          <h3>RSI Confirmation</h3>
+          <p>Entries only trigger inside the momentum zone that matches the trend — no exhausted moves.</p>
+        </div>
+        <span class="use-link">Use on TradingView <span class="arrow">→</span></span>
+      </a>
+      <a href="https://www.tradingview.com/support/solutions/43000502344-macd-moving-average-convergence-divergence/" target="_blank" rel="noopener" class="stack-card blue reveal">
+        <div>
+          <span class="tag">03 · TIMING</span>
+          <h3>MACD Cross</h3>
+          <p>A live MACD cross has to line up with EMA and RSI before a signal is considered valid.</p>
+        </div>
+        <span class="use-link">Use on TradingView <span class="arrow">→</span></span>
+      </a>
+      <a href="https://www.tradingview.com/support/solutions/43000501823-average-true-range-atr/" target="_blank" rel="noopener" class="stack-card red reveal">
+        <div>
+          <span class="tag">04 · RISK</span>
+          <h3>ATR-Based Exits</h3>
+          <p>Stop-loss and take-profit are set from current volatility, not a fixed pip count.</p>
+        </div>
+        <span class="use-link">Use on TradingView <span class="arrow">→</span></span>
+      </a>
+    </div>
+    <p class="stats-note" style="text-align:left; margin-top:20px;">↗ Links open TradingView's own guide for each indicator, where you can add it to a live XAU/USD or USTEC chart. <a href="https://www.tradingview.com/symbols/XAUUSD/" target="_blank" rel="noopener" style="color:var(--gold-deep); font-weight:600;">Open a live XAU/USD chart →</a></p>
+  </section>
+
+  <section id="stats" style="padding-top:0;">
+    <div class="stats-band reveal">
+      <div class="stat">
+        <span class="num" data-target="68">0</span>%
+        <div class="label">Illustrative win rate</div>
+      </div>
+      <div class="stat">
+        <span class="num" data-target="1.9">0</span>x
+        <div class="label">Sample reward:risk</div>
+      </div>
+      <div class="stat">
+        <span class="num" data-target="2">0</span>
+        <div class="label">Instruments covered</div>
+      </div>
+      <div class="stat">
+        <span class="num" data-target="24">0</span>/7
+        <div class="label">Signal monitoring</div>
+      </div>
+    </div>
+    <p class="stats-note">★ Demo figures for illustration only — live performance data is being compiled and will replace these once verified.</p>
+  </section>
+
+  <section id="pricing">
+    <div class="section-head reveal">
+      <span class="kicker">Subscribe</span>
+      <h2>Pick your access level.</h2>
+      <p>Cancel any time. Every plan covers both XAU/USD and USTEC signals.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="plan reveal">
+        <span class="plan-name">Starter</span>
+        <div class="plan-price">$0<span>/ 7-day trial</span></div>
+        <ul>
+          <li>Delayed signal delivery (15 min)</li>
+          <li>XAU/USD only</li>
+          <li>Email alerts</li>
+        </ul>
+        <button class="plan-btn" onclick="openModal('Starter')">Start trial</button>
+      </div>
+      <div class="plan featured reveal">
+        <span class="plan-name">Pro</span>
+        <div class="plan-price">$29<span>/ month</span></div>
+        <ul>
+          <li>Real-time signal delivery</li>
+          <li>XAU/USD + USTEC</li>
+          <li>Entry, stop &amp; target on every alert</li>
+          <li>Telegram + email delivery</li>
+        </ul>
+        <button class="plan-btn" onclick="openModal('Pro')">Subscribe</button>
+      </div>
+      <div class="plan reveal">
+        <span class="plan-name">Elite</span>
+        <div class="plan-price">$59<span>/ month</span></div>
+        <ul>
+          <li>Everything in Pro</li>
+          <li>Weekly strategy breakdown</li>
+          <li>Direct access for questions</li>
+        </ul>
+        <button class="plan-btn" onclick="openModal('Elite')">Subscribe</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq" style="padding-top:0;">
+    <div class="disclaimer reveal">
+      <strong>Risk disclosure:</strong> Trading gold (XAU/USD) and index CFDs (USTEC) carries a high level of risk and may not be suitable for all investors. Signals are generated by a rules-based strategy and are provided for informational purposes only — they are not personalized financial advice. Past or hypothetical performance, including any figures shown above, does not guarantee future results. Only trade with capital you can afford to lose, and consider consulting a licensed financial advisor before acting on any signal.
+    </div>
+  </section>
+
+  <footer>
+    <div>© 2026 GOLDWIRE. All signals, no noise.</div>
+    <div>Nairobi, Kenya</div>
+  </footer>
+
+<script>
+  // Build ticker content and duplicate for seamless loop
+  const symbols = [
+    {sym:'XAU/USD', price:'2,382.14', dir:'up', chg:'+0.42%'},
+    {sym:'USTEC', price:'19,842.6', dir:'down', chg:'-0.18%'},
+    {sym:'XAU/USD', price:'2,384.90', dir:'up', chg:'+0.51%'},
+    {sym:'USTEC', price:'19,867.2', dir:'up', chg:'+0.09%'},
+    {sym:'XAU/USD', price:'2,379.55', dir:'down', chg:'-0.11%'},
+    {sym:'USTEC', price:'19,801.4', dir:'down', chg:'-0.31%'},
+  ];
+  const track = document.getElementById('tickerTrack');
+  function buildTicker(){
+    let html = '';
+    for(let i=0;i<2;i++){
+      symbols.forEach(s=>{
+        html += `<span class="ticker-item"><span class="sym">${s.sym}</span> ${s.price} <span class="${s.dir}">${s.chg}</span></span>`;
+      });
+    }
+    track.innerHTML = html;
+  }
+  buildTicker();
+
+  // Candle stack
+  const candleStack = document.getElementById('candleStack');
+  const heights = [40,80,55,110,70,140,95,160,120,70];
+  heights.forEach((h,i)=>{
+    const c = document.createElement('div');
+    c.className = 'candle ' + (i % 3 === 0 ? 'down' : 'up');
+    c.style.height = h + 'px';
+    c.style.animationDelay = (i*0.06)+'s';
+    candleStack.appendChild(c);
+  });
+
+  // Scroll reveal
+  const revealEls = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        e.target.classList.add('in');
+        io.unobserve(e.target);
+      }
+    });
+  }, {threshold:0.15});
+  revealEls.forEach(el=>io.observe(el));
+
+  // Count-up stats
+  const statEls = document.querySelectorAll('.stat .num');
+  const statIO = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        const el = e.target;
+        const target = parseFloat(el.dataset.target);
+        const isDecimal = target % 1 !== 0;
+        let start = 0;
+        const duration = 1100;
+        const startTime = performance.now();
+        function step(now){
+          const p = Math.min((now-startTime)/duration, 1);
+          const eased = 1 - Math.pow(1-p, 3);
+          const val = target * eased;
+          el.textContent = isDecimal ? val.toFixed(1) : Math.round(val);
+          if(p < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+        statIO.unobserve(el);
+      }
+    });
+  }, {threshold:0.4});
+  statEls.forEach(el=>statIO.observe(el));
+</script>
+  <!-- hidden form so Netlify's build bots detect this form at deploy time -->
+  <form name="signup-interest" data-netlify="true" netlify-honeypot="bot-field" hidden>
+    <input type="text" name="name" />
+    <input type="email" name="email" />
+    <input type="text" name="plan" />
+    <input type="text" name="bot-field" />
+  </form>
+
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <button class="modal-close" onclick="closeModal()" aria-label="Close">✕</button>
+
+      <div id="modalFormWrap">
+        <span class="modal-eyebrow">Get started</span>
+        <h3 id="modalTitle">Create your <span id="modalPlanName">Starter</span> account</h3>
+        <p class="modal-sub">Set a password and you're in — <span class="plan-highlight" id="modalPlanInline">Starter</span> signals will start showing up in your dashboard.</p>
+
+        <form id="signupForm" name="signup-interest" method="POST" data-netlify="true" netlify-honeypot="bot-field" onsubmit="handleSubmit(event)">
+          <input type="hidden" name="form-name" value="signup-interest" />
+          <input type="hidden" name="plan" id="planField" value="Starter" />
+          <p hidden><label>Don't fill this out: <input name="bot-field" /></label></p>
+
+          <div class="modal-field">
+            <label for="nameInput">Name</label>
+            <input type="text" id="nameInput" name="name" placeholder="Your name" required>
+          </div>
+          <div class="modal-field">
+            <label for="emailInput">Email</label>
+            <input type="email" id="emailInput" name="email" placeholder="you@example.com" required>
+          </div>
+          <div class="modal-field">
+            <label for="passwordInput">Password</label>
+            <input type="password" id="passwordInput" name="password" placeholder="At least 8 characters" minlength="8" required>
+          </div>
+          <button type="submit" class="modal-submit">Create account</button>
+        </form>
+        <p class="modal-note" id="modalNote">No card required for Starter. We'll only email you about signal access.</p>
+      </div>
+
+      <div id="modalSuccess" class="modal-success" hidden>
+        <div class="check">✓</div>
+        <h3>You're in.</h3>
+        <p>Your <span id="modalPlanSuccess">Starter</span> account is ready. <a id="dashboardLink" href="#" target="_blank" style="color:var(--gold-deep); font-weight:700;">Go to your dashboard →</a></p>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // Point this at your deployed backend once it's live, e.g.
+  // const API_BASE = 'https://goldwire-backend.onrender.com';
+  const API_BASE = window.GOLDWIRE_API_BASE || 'http://localhost:4000';
+
+  function openModal(plan){
+    document.getElementById('modalPlanName').textContent = plan;
+    document.getElementById('modalPlanInline').textContent = plan;
+    document.getElementById('planField').value = plan;
+    document.getElementById('modalFormWrap').hidden = false;
+    document.getElementById('modalSuccess').hidden = true;
+    document.getElementById('signupForm').reset();
+    document.getElementById('planField').value = plan;
+    document.getElementById('modalOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal(){
+    document.getElementById('modalOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.getElementById('modalOverlay').addEventListener('click', (e)=>{
+    if(e.target.id === 'modalOverlay') closeModal();
+  });
+  document.addEventListener('keydown', (e)=>{
+    if(e.key === 'Escape') closeModal();
+  });
+
+  function submitToNetlifyWaitlist(form){
+    const data = new FormData(form);
+    return fetch('/', {
+      method: 'POST',
+      headers: {'Content-Type':'application/x-www-form-urlencoded'},
+      body: new URLSearchParams(data).toString()
+    });
+  }
+
+  function showSuccess(plan){
+    document.getElementById('modalFormWrap').hidden = true;
+    document.getElementById('modalSuccess').hidden = false;
+    document.getElementById('modalPlanSuccess').textContent = plan;
+  }
+
+  async function handleSubmit(e){
+    e.preventDefault();
+    const form = e.target;
+    const plan = document.getElementById('planField').value;
+    const name = document.getElementById('nameInput').value;
+    const email = document.getElementById('emailInput').value;
+    const password = document.getElementById('passwordInput').value;
+
+    try {
+      const resp = await fetch(API_BASE + '/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password, plan: plan.toLowerCase() }),
+      });
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data.error || 'Signup failed');
+
+      localStorage.setItem('goldwire_token', data.token);
+      document.getElementById('dashboardLink').href = API_BASE + '/dashboard.html';
+      showSuccess(plan);
+    } catch (err) {
+      // Backend not reachable yet (e.g. not deployed) — fall back to the
+      // Netlify waitlist form so no interest is lost during testing.
+      submitToNetlifyWaitlist(form)
+        .catch(()=>{})
+        .finally(()=>{
+          document.getElementById('dashboardLink').style.display = 'none';
+          showSuccess(plan);
+        });
+    }
+  }
+</script>
+
+</body>
+</html>

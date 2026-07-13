@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 
-const { router: authRouter };
+const { router: authRouter } = require('./routes/auth');
 const { router: adminAuthRouter } = require('./routes/admin');
 const signalsRouter = require('./routes/signals');
 

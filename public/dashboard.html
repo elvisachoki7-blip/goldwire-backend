@@ -84,6 +84,8 @@
   }
   .field input:focus, .field select:focus{outline:none; border-color:var(--gold);}
 
+  .field-grid{display:grid; grid-template-columns:1fr 1fr; gap:0 14px;}
+
   .btn{
     width:100%; padding:15px; border-radius:100px; border:none;
     background:var(--ink); color:var(--white); font-weight:700; font-size:15px;
@@ -97,6 +99,7 @@
     font-family:'Inter', sans-serif; display:block; text-align:center;
   }
   #error, #signupError{color:var(--red); font-size:13px; min-height:16px; margin-top:6px;}
+  #settingsMsg{color:var(--green); font-size:13px; min-height:16px; margin-top:10px;}
 
   #app, #signup{display:none;}
 
@@ -117,6 +120,19 @@
   }
   .signal .note{font-size:13px; color:var(--ink-soft); margin-top:6px; line-height:1.4;}
   .empty-state{color:var(--ink-soft); font-size:14px; text-align:center; padding:20px 0;}
+
+  .chart-links{display:flex; flex-direction:column; gap:10px;}
+  .chart-link{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 18px; border-radius:12px; border:2px solid var(--line);
+    text-decoration:none; color:var(--ink);
+    transition:transform .25s cubic-bezier(.34,1.56,.64,1), border-color .2s;
+  }
+  .chart-link:hover{transform:translateY(-2px); border-color:var(--gold);}
+  .chart-link .sym{font-family:'Bricolage Grotesque', sans-serif; font-weight:800; font-size:16px;}
+  .chart-link .arrow{font-family:'IBM Plex Mono', monospace; font-size:13px; color:var(--gold-deep); font-weight:600;}
+
+  .settings-note{font-size:12.5px; color:var(--ink-soft); line-height:1.5; margin-bottom:18px;}
 
   a:focus-visible, button:focus-visible{outline:3px solid var(--gold); outline-offset:2px;}
 </style>
@@ -179,6 +195,80 @@
         <span class="kicker">Account</span>
         <h1 id="welcomeName">Welcome<span id="planBadge" class="plan-badge"></span></h1>
         <div class="welcome" id="welcomeText"></div>
+      </div>
+
+      <div class="card">
+        <span class="kicker">Charts</span>
+        <h1 style="font-size:22px; margin-bottom:16px;">Live charts</h1>
+        <div class="chart-links">
+          <a class="chart-link" href="https://www.tradingview.com/symbols/XAUUSD/" target="_blank" rel="noopener">
+            <span class="sym">XAU/USD</span>
+            <span class="arrow">Open on TradingView →</span>
+          </a>
+          <a class="chart-link" href="https://www.tradingview.com/symbols/USTEC/" target="_blank" rel="noopener">
+            <span class="sym">USTEC</span>
+            <span class="arrow">Open on TradingView →</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="card">
+        <span class="kicker">Configuration</span>
+        <h1 style="font-size:22px;">Strategy settings</h1>
+        <p class="settings-note">Set your own EMA, RSI, MACD and ATR values. These are saved to your account and visible to the GOLDWIRE team when preparing your signals.</p>
+
+        <div class="field-grid">
+          <div class="field">
+            <label for="ema_fast">EMA fast</label>
+            <input type="number" id="ema_fast">
+          </div>
+          <div class="field">
+            <label for="ema_slow">EMA slow</label>
+            <input type="number" id="ema_slow">
+          </div>
+        </div>
+
+        <div class="field-grid">
+          <div class="field">
+            <label for="rsi_period">RSI period</label>
+            <input type="number" id="rsi_period">
+          </div>
+          <div class="field"></div>
+        </div>
+        <div class="field-grid">
+          <div class="field">
+            <label for="rsi_overbought">RSI overbought</label>
+            <input type="number" id="rsi_overbought">
+          </div>
+          <div class="field">
+            <label for="rsi_oversold">RSI oversold</label>
+            <input type="number" id="rsi_oversold">
+          </div>
+        </div>
+
+        <div class="field-grid">
+          <div class="field">
+            <label for="macd_fast">MACD fast</label>
+            <input type="number" id="macd_fast">
+          </div>
+          <div class="field">
+            <label for="macd_slow">MACD slow</label>
+            <input type="number" id="macd_slow">
+          </div>
+        </div>
+        <div class="field-grid">
+          <div class="field">
+            <label for="macd_signal">MACD signal</label>
+            <input type="number" id="macd_signal">
+          </div>
+          <div class="field">
+            <label for="atr_multiplier">ATR multiplier</label>
+            <input type="number" step="0.1" id="atr_multiplier">
+          </div>
+        </div>
+
+        <button class="btn" onclick="saveSettings()">Save settings</button>
+        <div id="settingsMsg"></div>
       </div>
 
       <div class="card">
@@ -291,6 +381,61 @@
     }
   }
 
+  async function loadSettings() {
+    try {
+      const res = await fetch(API + '/api/settings', {
+        headers: { 'Authorization': 'Bearer ' + getToken() }
+      });
+      const data = await res.json();
+      if (!res.ok) return;
+      const s = data.settings;
+      document.getElementById('ema_fast').value = s.ema_fast;
+      document.getElementById('ema_slow').value = s.ema_slow;
+      document.getElementById('rsi_period').value = s.rsi_period;
+      document.getElementById('rsi_overbought').value = s.rsi_overbought;
+      document.getElementById('rsi_oversold').value = s.rsi_oversold;
+      document.getElementById('macd_fast').value = s.macd_fast;
+      document.getElementById('macd_slow').value = s.macd_slow;
+      document.getElementById('macd_signal').value = s.macd_signal;
+      document.getElementById('atr_multiplier').value = s.atr_multiplier;
+    } catch (e) {
+      // leave fields blank on failure
+    }
+  }
+
+  async function saveSettings() {
+    const msgEl = document.getElementById('settingsMsg');
+    msgEl.textContent = '';
+    msgEl.style.color = 'var(--green)';
+    const body = {
+      ema_fast: Number(document.getElementById('ema_fast').value),
+      ema_slow: Number(document.getElementById('ema_slow').value),
+      rsi_period: Number(document.getElementById('rsi_period').value),
+      rsi_overbought: Number(document.getElementById('rsi_overbought').value),
+      rsi_oversold: Number(document.getElementById('rsi_oversold').value),
+      macd_fast: Number(document.getElementById('macd_fast').value),
+      macd_slow: Number(document.getElementById('macd_slow').value),
+      macd_signal: Number(document.getElementById('macd_signal').value),
+      atr_multiplier: Number(document.getElementById('atr_multiplier').value),
+    };
+    try {
+      const res = await fetch(API + '/api/settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + getToken()
+        },
+        body: JSON.stringify(body)
+      });
+      const data = await res.json();
+      if (!res.ok) { msgEl.style.color = 'var(--red)'; msgEl.textContent = data.error || 'Could not save settings'; return; }
+      msgEl.textContent = 'Saved.';
+    } catch (e) {
+      msgEl.style.color = 'var(--red)';
+      msgEl.textContent = 'Network error';
+    }
+  }
+
   function showApp(user) {
     document.getElementById('login').style.display = 'none';
     document.getElementById('signup').style.display = 'none';
@@ -299,6 +444,7 @@
     document.getElementById('welcomeText').textContent = user.name + ' · ' + user.email;
     document.getElementById('planBadge').textContent = user.plan;
     loadSignals();
+    loadSettings();
   }
 
   (async function init() {

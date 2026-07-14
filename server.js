@@ -6,7 +6,7 @@ const path = require('path');
 const { router: authRouter } = require('./routes/auth');
 const { router: adminAuthRouter } = require('./routes/admin');
 const signalsRouter = require('./routes/signals');
-
+const settingsRouter = require('./routes/settings');
 const app = express();
 const PORT = process.env.PORT || 4000;
 
@@ -19,7 +19,7 @@ app.get('/api/health', (req, res) => res.json({ ok: true }));
 app.use('/api/auth', authRouter);
 app.use('/api/admin', adminAuthRouter);
 app.use('/api/signals', signalsRouter);
-
+app.use('/api/settings', settingsRouter);
 app.listen(PORT, () => {
   console.log(`GOLDWIRE backend running on http://localhost:${PORT}`);
 });

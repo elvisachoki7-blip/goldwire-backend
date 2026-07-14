@@ -3,68 +3,198 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GOLDWIRE Dashboard</title>
+<title>GOLDWIRE — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  body { font-family: -apple-system, Helvetica, Arial, sans-serif; background:#14110f; color:#eee; margin:0; padding:24px; }
-  .card { background:#1e1a17; border-radius:12px; padding:24px; max-width:480px; margin:0 auto 20px; border:1px solid #333; }
-  h1 { font-size:18px; color:#e8a317; margin-top:0; }
-  input, select { width:100%; box-sizing:border-box; padding:10px; margin:6px 0 14px; border-radius:6px; border:1px solid #444; background:#0f0c0a; color:#eee; }
-  button { width:100%; padding:12px; border:none; border-radius:6px; background:#e8a317; color:#14110f; font-weight:bold; cursor:pointer; }
-  button:hover { opacity:0.9; }
-  .link-btn { background:none; color:#e8a317; text-decoration:underline; font-weight:normal; padding:6px; margin-top:4px; }
-  .signal { border-bottom:1px solid #333; padding:10px 0; font-size:14px; }
-  .buy { color:#0f9d58; } .sell { color:#e63946; }
-  #error, #signupError { color:#e63946; font-size:13px; min-height:16px; }
-  #app, #signup { display:none; }
-  .welcome { font-size:14px; color:#aaa; margin-bottom:16px; }
-  .plan-badge { display:inline-block; background:#e8a317; color:#14110f; font-size:11px; font-weight:bold; padding:2px 8px; border-radius:10px; margin-left:6px; }
-  .logout { background:#333; color:#eee; margin-top:8px; }
+  :root{
+    --white:#ffffff;
+    --ink:#14110f;
+    --ink-soft:#4a4540;
+    --gold:#e8a317;
+    --gold-deep:#a5730f;
+    --gold-pale:#fff3d9;
+    --green:#0f9d58;
+    --green-pale:#e5f6ec;
+    --red:#e63946;
+    --red-pale:#fdebec;
+    --line:#e9e5df;
+    --radius:18px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--white); color:var(--ink);
+    font-family:'Inter', sans-serif;
+    min-height:100vh;
+  }
+  .display{font-family:'Bricolage Grotesque', sans-serif;}
+  .mono{font-family:'IBM Plex Mono', monospace;}
+
+  header.nav{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:22px 6vw;
+  }
+  .logo{
+    font-family:'Bricolage Grotesque', sans-serif; font-weight:800; font-size:22px;
+    letter-spacing:-0.02em; display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--ink);
+  }
+  .logo .dot{
+    width:10px; height:10px; border-radius:50%; background:var(--gold);
+    box-shadow:0 0 0 4px var(--gold-pale);
+  }
+  .logout-btn{
+    background:none; border:2px solid var(--ink); color:var(--ink);
+    padding:9px 20px; border-radius:100px; font-weight:700; font-size:13.5px;
+    cursor:pointer; font-family:'Inter', sans-serif;
+    transition:transform .25s cubic-bezier(.34,1.56,.64,1), background .2s, color .2s;
+  }
+  .logout-btn:hover{background:var(--ink); color:var(--white); transform:translateY(-2px);}
+
+  main{max-width:640px; margin:0 auto; padding:20px 6vw 80px;}
+
+  .card{
+    border:2px solid var(--line); border-radius:var(--radius);
+    padding:30px 28px; margin-bottom:24px;
+  }
+  .kicker{
+    font-family:'IBM Plex Mono', monospace; font-size:12px; font-weight:600;
+    text-transform:uppercase; letter-spacing:0.08em; color:var(--gold-deep);
+    display:block; margin-bottom:10px;
+  }
+  h1{
+    font-family:'Bricolage Grotesque', sans-serif; font-weight:800;
+    font-size:26px; letter-spacing:-0.02em; margin-bottom:6px;
+  }
+  .plan-badge{
+    display:inline-block; background:var(--gold); color:var(--ink);
+    font-family:'IBM Plex Mono', monospace; font-size:11px; font-weight:700;
+    text-transform:uppercase; letter-spacing:0.05em;
+    padding:4px 12px; border-radius:100px; margin-left:8px; vertical-align:middle;
+  }
+  .welcome{color:var(--ink-soft); font-size:14.5px; margin-top:4px;}
+
+  .field{margin-bottom:14px;}
+  .field label{
+    display:block; font-size:12.5px; font-weight:600; margin-bottom:6px; color:var(--ink-soft);
+  }
+  .field input, .field select{
+    width:100%; padding:13px 14px; border-radius:10px;
+    border:2px solid var(--line); font-size:14.5px; font-family:'Inter', sans-serif;
+    transition:border-color .2s; background:var(--white); color:var(--ink);
+  }
+  .field input:focus, .field select:focus{outline:none; border-color:var(--gold);}
+
+  .btn{
+    width:100%; padding:15px; border-radius:100px; border:none;
+    background:var(--ink); color:var(--white); font-weight:700; font-size:15px;
+    cursor:pointer; font-family:'Inter', sans-serif;
+    transition:transform .3s cubic-bezier(.34,1.56,.64,1), background .2s;
+  }
+  .btn:hover{transform:translateY(-2px) scale(1.02); background:var(--gold-deep);}
+  .btn-link{
+    background:none; border:none; color:var(--gold-deep); text-decoration:underline;
+    font-weight:600; font-size:13.5px; cursor:pointer; padding:8px 0; margin-top:4px;
+    font-family:'Inter', sans-serif; display:block; text-align:center;
+  }
+  #error, #signupError{color:var(--red); font-size:13px; min-height:16px; margin-top:6px;}
+
+  #app, #signup{display:none;}
+
+  .signal{
+    border-top:1px solid var(--line); padding:14px 0; font-size:14.5px;
+  }
+  .signal:first-child{border-top:none;}
+  .signal .row{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+  .signal .instrument{font-weight:700; font-family:'Bricolage Grotesque', sans-serif; font-size:16px;}
+  .dir{
+    font-family:'IBM Plex Mono', monospace; font-weight:700; font-size:12px;
+    padding:3px 10px; border-radius:100px;
+  }
+  .dir.buy{background:var(--green-pale); color:#0b6b3d;}
+  .dir.sell{background:var(--red-pale); color:#a72330;}
+  .signal .details{
+    font-family:'IBM Plex Mono', monospace; font-size:12.5px; color:var(--ink-soft); margin-top:6px;
+  }
+  .signal .note{font-size:13px; color:var(--ink-soft); margin-top:6px; line-height:1.4;}
+  .empty-state{color:var(--ink-soft); font-size:14px; text-align:center; padding:20px 0;}
+
+  a:focus-visible, button:focus-visible{outline:3px solid var(--gold); outline-offset:2px;}
 </style>
 </head>
 <body>
 
-<div class="card" id="login">
-  <h1>Log In</h1>
-  <input type="email" id="email" placeholder="Email">
-  <input type="password" id="password" placeholder="Password">
-  <button onclick="login()">Log In</button>
-  <button class="link-btn" onclick="showSignup()">Need an account? Sign up</button>
-  <div id="error"></div>
-</div>
+  <header class="nav">
+    <a href="/" class="logo"><span class="dot"></span>GOLDWIRE</a>
+    <button class="logout-btn" id="logoutBtn" onclick="logout()" style="display:none;">Log out</button>
+  </header>
 
-<div class="card" id="signup">
-  <h1>Create Account</h1>
-  <input id="su_name" placeholder="Name">
-  <input type="email" id="su_email" placeholder="Email">
-  <input type="password" id="su_password" placeholder="Password">
-  <select id="su_plan">
-    <option value="starter">Starter (delayed signals)</option>
-    <option value="pro">Pro (instant signals)</option>
-  </select>
-  <button onclick="signup()">Sign Up</button>
-  <button class="link-btn" onclick="showLogin()">Already have an account? Log in</button>
-  <div id="signupError"></div>
-</div>
+  <main>
+    <div class="card" id="login">
+      <span class="kicker">Welcome back</span>
+      <h1>Log in</h1>
+      <p class="welcome" style="margin-bottom:20px;">Enter your details to view your signals.</p>
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="you@example.com">
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Your password">
+      </div>
+      <button class="btn" onclick="login()">Log in</button>
+      <button class="btn-link" onclick="showSignup()">Need an account? Sign up</button>
+      <div id="error"></div>
+    </div>
 
-<div id="app">
-  <div class="card">
-    <h1>Welcome<span id="planBadge" class="plan-badge"></span></h1>
-    <div class="welcome" id="welcomeText"></div>
-    <button class="logout" onclick="logout()">Log Out</button>
-  </div>
+    <div class="card" id="signup">
+      <span class="kicker">Get started</span>
+      <h1>Create account</h1>
+      <div class="field">
+        <label for="su_name">Name</label>
+        <input id="su_name" placeholder="Your name">
+      </div>
+      <div class="field">
+        <label for="su_email">Email</label>
+        <input type="email" id="su_email" placeholder="you@example.com">
+      </div>
+      <div class="field">
+        <label for="su_password">Password</label>
+        <input type="password" id="su_password" placeholder="At least 8 characters">
+      </div>
+      <div class="field">
+        <label for="su_plan">Plan</label>
+        <select id="su_plan">
+          <option value="starter">Starter (delayed signals)</option>
+          <option value="pro">Pro (real-time)</option>
+          <option value="elite">Elite (real-time + extras)</option>
+        </select>
+      </div>
+      <button class="btn" onclick="signup()">Create account</button>
+      <button class="btn-link" onclick="showLogin()">Already have an account? Log in</button>
+      <div id="signupError"></div>
+    </div>
 
-  <div class="card">
-    <h1>Signal History</h1>
-    <div id="signals">Loading…</div>
-  </div>
-</div>
+    <div id="app">
+      <div class="card">
+        <span class="kicker">Account</span>
+        <h1 id="welcomeName">Welcome<span id="planBadge" class="plan-badge"></span></h1>
+        <div class="welcome" id="welcomeText"></div>
+      </div>
+
+      <div class="card">
+        <span class="kicker">Signal history</span>
+        <h1 style="font-size:22px; margin-bottom:16px;">Recent signals</h1>
+        <div id="signals">Loading…</div>
+      </div>
+    </div>
+  </main>
 
 <script>
   const API = 'https://goldwire-backend-1.onrender.com';
 
-  function getToken() { return localStorage.getItem('user_token'); }
-  function setToken(t) { localStorage.setItem('user_token', t); }
-  function clearToken() { localStorage.removeItem('user_token'); }
+  function getToken() { return localStorage.getItem('goldwire_token'); }
+  function setToken(t) { localStorage.setItem('goldwire_token', t); }
+  function clearToken() { localStorage.removeItem('goldwire_token'); }
 
   function showSignup() {
     document.getElementById('login').style.display = 'none';
@@ -120,6 +250,8 @@
   function logout() {
     clearToken();
     document.getElementById('app').style.display = 'none';
+    document.getElementById('logoutBtn').style.display = 'none';
+    document.getElementById('signup').style.display = 'none';
     document.getElementById('login').style.display = 'block';
   }
 
@@ -143,17 +275,19 @@
         headers: { 'Authorization': 'Bearer ' + getToken() }
       });
       const data = await res.json();
-      if (!res.ok) { el.textContent = data.error || 'Could not load signals'; return; }
+      if (!res.ok) { el.innerHTML = '<div class="empty-state">' + (data.error || 'Could not load signals') + '</div>'; return; }
       el.innerHTML = data.signals.map(s => `
         <div class="signal">
-          <strong>${s.instrument}</strong>
-          <span class="${s.direction}">${s.direction.toUpperCase()}</span>
-          — entry ${s.entry}, SL ${s.stop_loss}, TP ${s.take_profit}
-          ${s.note ? `<div style="color:#999; font-size:12px; margin-top:4px;">${s.note}</div>` : ''}
+          <div class="row">
+            <span class="instrument">${s.instrument}</span>
+            <span class="dir ${s.direction}">${s.direction.toUpperCase()}</span>
+          </div>
+          <div class="details">ENTRY ${s.entry} &nbsp;·&nbsp; SL ${s.stop_loss} &nbsp;·&nbsp; TP ${s.take_profit}</div>
+          ${s.note ? `<div class="note">${s.note}</div>` : ''}
         </div>
-      `).join('') || 'No signals yet.';
+      `).join('') || '<div class="empty-state">No signals yet — they\'ll show up here as soon as one is sent.</div>';
     } catch (e) {
-      el.textContent = 'Network error';
+      el.innerHTML = '<div class="empty-state">Network error loading signals.</div>';
     }
   }
 
@@ -161,7 +295,8 @@
     document.getElementById('login').style.display = 'none';
     document.getElementById('signup').style.display = 'none';
     document.getElementById('app').style.display = 'block';
-    document.getElementById('welcomeText').textContent = user.name + ' (' + user.email + ')';
+    document.getElementById('logoutBtn').style.display = 'inline-block';
+    document.getElementById('welcomeText').textContent = user.name + ' · ' + user.email;
     document.getElementById('planBadge').textContent = user.plan;
     loadSignals();
   }
@@ -169,8 +304,9 @@
   (async function init() {
     if (getToken()) {
       const user = await loadMe();
-      if (user) showApp(user);
+      if (user) { showApp(user); return; }
     }
+    document.getElementById('login').style.display = 'block';
   })();
 </script>
 

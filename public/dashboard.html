@@ -19,20 +19,36 @@
     --red:#e63946;
     --red-pale:#fdebec;
     --line:#e9e5df;
+    --blue:#2952e3;
+    --blue-deep:#1d38a8;
+    --blue-pale:#eaeeff;
     --radius:18px;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   body{
-    background:var(--white); color:var(--ink);
+    background:
+      radial-gradient(circle at 100% 0%, var(--gold-pale) 0%, transparent 45%),
+      radial-gradient(circle at 0% 100%, var(--gold-pale) 0%, transparent 35%),
+      var(--white);
+    color:var(--ink);
     font-family:'Inter', sans-serif;
     min-height:100vh;
   }
   .display{font-family:'Bricolage Grotesque', sans-serif;}
   .mono{font-family:'IBM Plex Mono', monospace;}
 
+  @keyframes fadeInUp{
+    from{opacity:0; transform:translateY(22px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+
   header.nav{
     display:flex; align-items:center; justify-content:space-between;
     padding:22px 6vw;
+    position:sticky; top:0; z-index:10;
+    background:rgba(255,255,255,0.85);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
   }
   .logo{
     font-family:'Bricolage Grotesque', sans-serif; font-weight:800; font-size:22px;
@@ -55,7 +71,29 @@
   .card{
     border:2px solid var(--line); border-radius:var(--radius);
     padding:30px 28px; margin-bottom:24px;
+    background:var(--white);
+    box-shadow:0 2px 6px -2px rgba(20,17,15,0.06);
+    animation:fadeInUp .6s cubic-bezier(.2,1.2,.3,1) both;
+    transition:transform .35s cubic-bezier(.34,1.56,.64,1), box-shadow .35s, border-color .3s;
   }
+  .card:hover{
+    transform:translateY(-5px);
+    box-shadow:0 24px 44px -20px rgba(20,17,15,0.2);
+    border-color:var(--gold);
+  }
+  #app .card:nth-of-type(1){animation-delay:.02s;}
+  #app .card:nth-of-type(2){animation-delay:.09s;}
+  #app .card:nth-of-type(3){animation-delay:.16s;}
+  #app .card:nth-of-type(4){animation-delay:.23s;}
+
+  .card.hero{
+    background:linear-gradient(135deg, var(--ink) 0%, #2a2420 100%);
+    color:var(--white); border:none;
+    box-shadow:0 24px 48px -20px rgba(20,17,15,0.4);
+  }
+  .card.hero:hover{border-color:transparent; box-shadow:0 28px 54px -18px rgba(20,17,15,0.5);}
+  .card.hero .kicker{color:var(--gold);}
+  .card.hero .welcome{color:rgba(255,255,255,0.72);}
   .kicker{
     font-family:'IBM Plex Mono', monospace; font-size:12px; font-weight:600;
     text-transform:uppercase; letter-spacing:0.08em; color:var(--gold-deep);
@@ -66,10 +104,12 @@
     font-size:26px; letter-spacing:-0.02em; margin-bottom:6px;
   }
   .plan-badge{
-    display:inline-block; background:var(--gold); color:var(--ink);
+    display:inline-block; background:linear-gradient(135deg, var(--gold), var(--gold-deep));
+    color:var(--ink);
     font-family:'IBM Plex Mono', monospace; font-size:11px; font-weight:700;
     text-transform:uppercase; letter-spacing:0.05em;
     padding:4px 12px; border-radius:100px; margin-left:8px; vertical-align:middle;
+    box-shadow:0 4px 14px -4px rgba(232,163,23,0.6);
   }
   .welcome{color:var(--ink-soft); font-size:14.5px; margin-top:4px;}
 
@@ -80,9 +120,9 @@
   .field input, .field select{
     width:100%; padding:13px 14px; border-radius:10px;
     border:2px solid var(--line); font-size:14.5px; font-family:'Inter', sans-serif;
-    transition:border-color .2s; background:var(--white); color:var(--ink);
+    transition:border-color .2s, box-shadow .2s; background:var(--white); color:var(--ink);
   }
-  .field input:focus, .field select:focus{outline:none; border-color:var(--gold);}
+  .field input:focus, .field select:focus{outline:none; border-color:var(--gold); box-shadow:0 0 0 4px var(--gold-pale);}
 
   .field-grid{display:grid; grid-template-columns:1fr 1fr; gap:0 14px;}
 
@@ -90,9 +130,13 @@
     width:100%; padding:15px; border-radius:100px; border:none;
     background:var(--ink); color:var(--white); font-weight:700; font-size:15px;
     cursor:pointer; font-family:'Inter', sans-serif;
-    transition:transform .3s cubic-bezier(.34,1.56,.64,1), background .2s;
+    transition:transform .3s cubic-bezier(.34,1.56,.64,1), background .2s, box-shadow .3s;
   }
-  .btn:hover{transform:translateY(-2px) scale(1.02); background:var(--gold-deep);}
+  .btn:hover{
+    transform:translateY(-3px) scale(1.02);
+    background:var(--gold-deep);
+    box-shadow:0 14px 28px -10px rgba(165,115,15,0.5);
+  }
   .btn-link{
     background:none; border:none; color:var(--gold-deep); text-decoration:underline;
     font-weight:600; font-size:13.5px; cursor:pointer; padding:8px 0; margin-top:4px;
@@ -104,8 +148,15 @@
   #app, #signup{display:none;}
 
   .signal{
-    border-top:1px solid var(--line); padding:14px 0; font-size:14.5px;
+    border-top:1px solid var(--line); padding:14px 0 14px 14px; font-size:14.5px;
+    position:relative; transition:padding .2s;
   }
+  .signal:before{
+    content:''; position:absolute; left:0; top:18px; bottom:18px; width:3px;
+    border-radius:3px; background:var(--line);
+  }
+  .signal.buy:before{background:var(--green);}
+  .signal.sell:before{background:var(--red);}
   .signal:first-child{border-top:none;}
   .signal .row{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
   .signal .instrument{font-weight:700; font-family:'Bricolage Grotesque', sans-serif; font-size:16px;}
@@ -138,14 +189,14 @@
     border:2px solid var(--line); font-size:14.5px; font-family:'IBM Plex Mono', monospace;
     text-transform:uppercase; background:var(--white); color:var(--ink);
   }
-  .symbol-search input:focus{outline:none; border-color:var(--gold);}
+  .symbol-search input:focus{outline:none; border-color:var(--gold); box-shadow:0 0 0 4px var(--gold-pale);}
   .symbol-search button{
     padding:0 22px; border-radius:10px; border:none;
     background:var(--ink); color:var(--white); font-weight:700; font-size:14px;
     cursor:pointer; font-family:'Inter', sans-serif; white-space:nowrap;
-    transition:background .2s;
+    transition:background .2s, transform .25s cubic-bezier(.34,1.56,.64,1);
   }
-  .symbol-search button:hover{background:var(--gold-deep);}
+  .symbol-search button:hover{background:var(--gold-deep); transform:translateY(-2px);}
   .category-block{margin-bottom:16px;}
   .category-label{
     font-family:'IBM Plex Mono', monospace; font-size:11px; font-weight:600;
@@ -157,10 +208,14 @@
     padding:7px 14px 7px 10px; border-radius:100px; border:2px solid var(--line);
     background:var(--white); color:var(--ink); font-size:13px; font-weight:600;
     font-family:'IBM Plex Mono', monospace; cursor:pointer; text-decoration:none;
-    transition:transform .2s cubic-bezier(.34,1.56,.64,1), border-color .2s, background .2s;
+    transition:transform .25s cubic-bezier(.34,1.56,.64,1), border-color .2s, background .2s, box-shadow .25s;
     display:inline-flex; align-items:center; gap:8px;
   }
-  .chip:hover{transform:translateY(-2px); border-color:var(--gold); background:var(--gold-pale);}
+  .chip:hover{
+    transform:translateY(-3px) rotate(-1deg);
+    border-color:var(--gold); background:var(--gold-pale);
+    box-shadow:0 12px 22px -10px rgba(20,17,15,0.22);
+  }
   .chip .icon{
     width:20px; height:20px; border-radius:50%; object-fit:cover;
     background:var(--gold-pale); flex-shrink:0;
@@ -182,6 +237,9 @@
     display:flex; align-items:center; justify-content:center;
     font-size:7px; font-weight:700; font-family:'IBM Plex Mono', monospace;
   }
+  .icon-badge.forex{background:linear-gradient(135deg, var(--blue), var(--blue-deep)); color:var(--white);}
+  .icon-badge.commodities{background:linear-gradient(135deg, var(--gold), var(--gold-deep)); color:var(--ink);}
+  .icon-badge.indices{background:linear-gradient(135deg, var(--ink), #2a2420); color:var(--gold);}
 
   .settings-note{font-size:12.5px; color:var(--ink-soft); line-height:1.5; margin-bottom:18px;}
 
@@ -242,7 +300,7 @@
     </div>
 
     <div id="app">
-      <div class="card">
+      <div class="card hero">
         <span class="kicker">Account</span>
         <h1 id="welcomeName">Welcome<span id="planBadge" class="plan-badge"></span></h1>
         <div class="welcome" id="welcomeText"></div>
@@ -351,21 +409,21 @@
 
   const SYMBOLS = {
     forex: [
-      { sym:'EURUSD', label:'EUR/USD', badge:'EU' },
-      { sym:'GBPUSD', label:'GBP/USD', badge:'GB' },
-      { sym:'USDJPY', label:'USD/JPY', badge:'JP' },
-      { sym:'AUDUSD', label:'AUD/USD', badge:'AU' },
+      { sym:'EURUSD', label:'EUR/USD', badge:'EU', c1:'#2952e3', c2:'#1d38a8', fg:'#ffffff' },
+      { sym:'GBPUSD', label:'GBP/USD', badge:'GB', c1:'#7b2ff7', c2:'#5a1fb8', fg:'#ffffff' },
+      { sym:'USDJPY', label:'USD/JPY', badge:'JP', c1:'#e0447b', c2:'#ad2f5c', fg:'#ffffff' },
+      { sym:'AUDUSD', label:'AUD/USD', badge:'AU', c1:'#12b886', c2:'#0b8a63', fg:'#ffffff' },
     ],
     commodities: [
-      { sym:'XAUUSD', label:'XAU/USD', badge:'AU' },
-      { sym:'XAGUSD', label:'XAG/USD', badge:'AG' },
-      { sym:'USOIL', label:'Crude oil', badge:'OIL' },
+      { sym:'XAUUSD', label:'XAU/USD', badge:'AU', c1:'#e8a317', c2:'#a5730f', fg:'#14110f' },
+      { sym:'XAGUSD', label:'XAG/USD', badge:'AG', c1:'#9aa5b1', c2:'#6b7684', fg:'#ffffff' },
+      { sym:'USOIL', label:'Crude oil', badge:'OIL', c1:'#4a4540', c2:'#231f1c', fg:'#ffffff' },
     ],
     indices: [
-      { sym:'USTEC', label:'USTEC', badge:'TEC' },
-      { sym:'SPX500', label:'S&P 500', badge:'SPX' },
-      { sym:'DJI', label:'Dow Jones', badge:'DJI' },
-      { sym:'UK100', label:'FTSE 100', badge:'UK' },
+      { sym:'USTEC', label:'USTEC', badge:'TEC', c1:'#0ea5a5', c2:'#0b7a7a', fg:'#ffffff' },
+      { sym:'SPX500', label:'S&P 500', badge:'SPX', c1:'#2f9e44', c2:'#1f7a34', fg:'#ffffff' },
+      { sym:'DJI', label:'Dow Jones', badge:'DJI', c1:'#495057', c2:'#2b2f33', fg:'#ffffff' },
+      { sym:'UK100', label:'FTSE 100', badge:'UK', c1:'#c0392b', c2:'#8e2a20', fg:'#ffffff' },
     ],
     stocks: [
       { sym:'AAPL', label:'Apple', img:'https://logo.clearbit.com/apple.com' },
@@ -381,11 +439,14 @@
     ],
   };
   const SYMBOL_LOOKUP = {};
-  Object.values(SYMBOLS).flat().forEach(s => { SYMBOL_LOOKUP[s.sym] = s; });
+  Object.keys(SYMBOLS).forEach(cat => {
+    SYMBOLS[cat].forEach(s => { s.cat = cat; SYMBOL_LOOKUP[s.sym] = s; });
+  });
 
   function iconHtml(entry) {
     if (entry.img) return '<img class="icon" src="' + entry.img + '" alt="" onerror="this.style.display=\'none\'">';
-    return '<span class="icon-badge">' + entry.badge + '</span>';
+    var style = 'background:linear-gradient(135deg,' + entry.c1 + ',' + entry.c2 + ');color:' + entry.fg + ';';
+    return '<span class="icon-badge" style="' + style + '">' + entry.badge + '</span>';
   }
 
   function renderChips() {
@@ -506,7 +567,7 @@
       const data = await res.json();
       if (!res.ok) { el.innerHTML = '<div class="empty-state">' + (data.error || 'Could not load signals') + '</div>'; return; }
       el.innerHTML = data.signals.map(s => `
-        <div class="signal">
+        <div class="signal ${s.direction}">
           <div class="row">
             <span class="instrument">${s.instrument}</span>
             <span class="dir ${s.direction}">${s.direction.toUpperCase()}</span>

@@ -165,13 +165,23 @@
     width:20px; height:20px; border-radius:50%; object-fit:cover;
     background:var(--gold-pale); flex-shrink:0;
   }
-  .chip .icon-emoji{font-size:15px; line-height:1; flex-shrink:0;}
+  .chip .icon-badge{
+    width:20px; height:20px; border-radius:50%; flex-shrink:0;
+    background:var(--gold-pale); color:var(--gold-deep);
+    display:flex; align-items:center; justify-content:center;
+    font-size:8px; font-weight:700; font-family:'IBM Plex Mono', monospace;
+  }
   .search-preview{
     display:flex; align-items:center; gap:8px; margin-top:-8px; margin-bottom:16px;
     font-size:12.5px; color:var(--ink-soft); min-height:20px;
   }
   .search-preview .icon{width:18px; height:18px; border-radius:50%; object-fit:cover;}
-  .search-preview .icon-emoji{font-size:14px;}
+  .search-preview .icon-badge{
+    width:18px; height:18px; border-radius:50%; flex-shrink:0;
+    background:var(--gold-pale); color:var(--gold-deep);
+    display:flex; align-items:center; justify-content:center;
+    font-size:7px; font-weight:700; font-family:'IBM Plex Mono', monospace;
+  }
 
   .settings-note{font-size:12.5px; color:var(--ink-soft); line-height:1.5; margin-bottom:18px;}
 
@@ -339,26 +349,23 @@
 <script>
   const API = 'https://goldwire-backend-1.onrender.com';
 
-  // Each symbol maps to either a real logo image (stocks via company domain,
-  // crypto via CoinCap's icon set) or an emoji when there's no single "brand"
-  // to show (forex pairs, indices, commodities).
   const SYMBOLS = {
     forex: [
-      { sym:'EURUSD', label:'EUR/USD', emoji:'🇪🇺' },
-      { sym:'GBPUSD', label:'GBP/USD', emoji:'🇬🇧' },
-      { sym:'USDJPY', label:'USD/JPY', emoji:'🇯🇵' },
-      { sym:'AUDUSD', label:'AUD/USD', emoji:'🇦🇺' },
+      { sym:'EURUSD', label:'EUR/USD', badge:'EU' },
+      { sym:'GBPUSD', label:'GBP/USD', badge:'GB' },
+      { sym:'USDJPY', label:'USD/JPY', badge:'JP' },
+      { sym:'AUDUSD', label:'AUD/USD', badge:'AU' },
     ],
     commodities: [
-      { sym:'XAUUSD', label:'XAU/USD', emoji:'🥇' },
-      { sym:'XAGUSD', label:'XAG/USD', emoji:'🥈' },
-      { sym:'USOIL', label:'Crude oil', emoji:'🛢️' },
+      { sym:'XAUUSD', label:'XAU/USD', badge:'AU' },
+      { sym:'XAGUSD', label:'XAG/USD', badge:'AG' },
+      { sym:'USOIL', label:'Crude oil', badge:'OIL' },
     ],
     indices: [
-      { sym:'USTEC', label:'USTEC', emoji:'💻' },
-      { sym:'SPX500', label:'S&P 500', emoji:'📈' },
-      { sym:'DJI', label:'Dow Jones', emoji:'🏛️' },
-      { sym:'UK100', label:'FTSE 100', emoji:'🇬🇧' },
+      { sym:'USTEC', label:'USTEC', badge:'TEC' },
+      { sym:'SPX500', label:'S&P 500', badge:'SPX' },
+      { sym:'DJI', label:'Dow Jones', badge:'DJI' },
+      { sym:'UK100', label:'FTSE 100', badge:'UK' },
     ],
     stocks: [
       { sym:'AAPL', label:'Apple', img:'https://logo.clearbit.com/apple.com' },
@@ -370,174 +377,4 @@
     crypto: [
       { sym:'BTCUSD', label:'BTC/USD', img:'https://assets.coincap.io/assets/icons/btc@2x.png' },
       { sym:'ETHUSD', label:'ETH/USD', img:'https://assets.coincap.io/assets/icons/eth@2x.png' },
-      { sym:'SOLUSD', label:'SOL/USD', img:'https://assets.coincap.io/assets/icons/sol@2x.png' },
-    ],
-  };
-  // Lookup table so the search box can also show an icon for known symbols.
-  const SYMBOL_LOOKUP = {};
-  Object.values(SYMBOLS).flat().forEach(s => { SYMBOL_LOOKUP[s.sym] = s; });
-
-  function iconHtml(entry) {
-    if (entry.img) return `<img class="icon" src="${entry.img}" alt="" onerror="this.style.display='none'">`;
-    return `<span class="icon-emoji">${entry.emoji}</span>`;
-  }
-
-  function renderChips() {
-    Object.keys(SYMBOLS).forEach(cat => {
-      const el = document.getElementById('chips-' + cat);
-      if (!el) return;
-      el.innerHTML = SYMBOLS[cat].map(s => `
-        <a class="chip" href="#" onclick="return goSymbol('${s.sym}')">${iconHtml(s)}${s.label}</a>
-      `).join('');
-    });
-  }
-
-  function updatePreview() {
-    const raw = document.getElementById('symbolInput').value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
-    const el = document.getElementById('searchPreview');
-    if (!raw) { el.innerHTML = ''; return; }
-    if (SYMBOL_LOOKUP[raw]) {
-      const s = SYMBOL_LOOKUP[raw];
-      el.innerHTML = iconHtml(s) + ' ' + s.label;
-      return;
-    }
-    // Unknown symbol — try a company-logo guess for stock tickers, fall back silently.
-    const guess = `https://logo.clearbit.com/${raw.toLowerCase()}.com`;
-    el.innerHTML = `<img class="icon" src="${guess}" alt="" onerror="this.style.display='none'"> ${raw}`;
-  }
-
-  function goSymbol(sym) {
-    window.open('https://www.tradingview.com/symbols/' + sym + '/', '_blank', 'noopener');
-    return false;
-  }
-  function openSymbol() {
-    const raw = document.getElementById('symbolInput').value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
-    if (!raw) return;
-    goSymbol(raw);
-  }
-
-  function getToken() { return localStorage.getItem('goldwire_token'); }
-  function setToken(t) { localStorage.setItem('goldwire_token', t); }
-  function clearToken() { localStorage.removeItem('goldwire_token'); }
-
-  function showSignup() {
-    document.getElementById('login').style.display = 'none';
-    document.getElementById('signup').style.display = 'block';
-  }
-  function showLogin() {
-    document.getElementById('signup').style.display = 'none';
-    document.getElementById('login').style.display = 'block';
-  }
-
-  async function login() {
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    const errEl = document.getElementById('error');
-    errEl.textContent = '';
-    try {
-      const res = await fetch(API + '/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
-      const data = await res.json();
-      if (!res.ok) { errEl.textContent = data.error || 'Login failed'; return; }
-      setToken(data.token);
-      showApp(data.user);
-    } catch (e) {
-      errEl.textContent = 'Network error';
-    }
-  }
-
-  async function signup() {
-    const name = document.getElementById('su_name').value;
-    const email = document.getElementById('su_email').value;
-    const password = document.getElementById('su_password').value;
-    const plan = document.getElementById('su_plan').value;
-    const errEl = document.getElementById('signupError');
-    errEl.textContent = '';
-    try {
-      const res = await fetch(API + '/api/auth/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password, plan })
-      });
-      const data = await res.json();
-      if (!res.ok) { errEl.textContent = data.error || 'Signup failed'; return; }
-      setToken(data.token);
-      showApp(data.user);
-    } catch (e) {
-      errEl.textContent = 'Network error';
-    }
-  }
-
-  function logout() {
-    clearToken();
-    document.getElementById('app').style.display = 'none';
-    document.getElementById('logoutBtn').style.display = 'none';
-    document.getElementById('signup').style.display = 'none';
-    document.getElementById('login').style.display = 'block';
-  }
-
-  async function loadMe() {
-    try {
-      const res = await fetch(API + '/api/auth/me', {
-        headers: { 'Authorization': 'Bearer ' + getToken() }
-      });
-      const data = await res.json();
-      if (!res.ok) { logout(); return null; }
-      return data.user;
-    } catch (e) {
-      return null;
-    }
-  }
-
-  async function loadSignals() {
-    const el = document.getElementById('signals');
-    try {
-      const res = await fetch(API + '/api/signals', {
-        headers: { 'Authorization': 'Bearer ' + getToken() }
-      });
-      const data = await res.json();
-      if (!res.ok) { el.innerHTML = '<div class="empty-state">' + (data.error || 'Could not load signals') + '</div>'; return; }
-      el.innerHTML = data.signals.map(s => `
-        <div class="signal">
-          <div class="row">
-            <span class="instrument">${s.instrument}</span>
-            <span class="dir ${s.direction}">${s.direction.toUpperCase()}</span>
-          </div>
-          <div class="details">ENTRY ${s.entry} &nbsp;·&nbsp; SL ${s.stop_loss} &nbsp;·&nbsp; TP ${s.take_profit}</div>
-          ${s.note ? `<div class="note">${s.note}</div>` : ''}
-        </div>
-      `).join('') || '<div class="empty-state">No signals yet — they\'ll show up here as soon as one is sent.</div>';
-    } catch (e) {
-      el.innerHTML = '<div class="empty-state">Network error loading signals.</div>';
-    }
-  }
-
-  async function loadSettings() {
-    try {
-      const res = await fetch(API + '/api/settings', {
-        headers: { 'Authorization': 'Bearer ' + getToken() }
-      });
-      const data = await res.json();
-      if (!res.ok) return;
-      const s = data.settings;
-      document.getElementById('ema_fast').value = s.ema_fast;
-      document.getElementById('ema_slow').value = s.ema_slow;
-      document.getElementById('rsi_period').value = s.rsi_period;
-      document.getElementById('rsi_overbought').value = s.rsi_overbought;
-      document.getElementById('rsi_oversold').value = s.rsi_oversold;
-      document.getElementById('macd_fast').value = s.macd_fast;
-      document.getElementById('macd_slow').value = s.macd_slow;
-      document.getElementById('macd_signal').value = s.macd_signal;
-      document.getElementById('atr_multiplier').value = s.atr_multiplier;
-    } catch (e) {
-      // leave fields blank on failure
-    }
-  }
-
-  async function saveSettings() {
-    const msgEl = document.getElementById('settingsMsg');
-    msgEl.textContent = '';
-    msgEl.style.color = 'var(--green)';
+      { sym:'SOLUSD', label:'SOL/USD',

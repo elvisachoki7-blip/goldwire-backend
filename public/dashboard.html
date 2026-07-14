@@ -132,6 +132,47 @@
   .chart-link .sym{font-family:'Bricolage Grotesque', sans-serif; font-weight:800; font-size:16px;}
   .chart-link .arrow{font-family:'IBM Plex Mono', monospace; font-size:13px; color:var(--gold-deep); font-weight:600;}
 
+  .symbol-search{display:flex; gap:10px; margin-bottom:18px;}
+  .symbol-search input{
+    flex:1; padding:13px 14px; border-radius:10px;
+    border:2px solid var(--line); font-size:14.5px; font-family:'IBM Plex Mono', monospace;
+    text-transform:uppercase; background:var(--white); color:var(--ink);
+  }
+  .symbol-search input:focus{outline:none; border-color:var(--gold);}
+  .symbol-search button{
+    padding:0 22px; border-radius:10px; border:none;
+    background:var(--ink); color:var(--white); font-weight:700; font-size:14px;
+    cursor:pointer; font-family:'Inter', sans-serif; white-space:nowrap;
+    transition:background .2s;
+  }
+  .symbol-search button:hover{background:var(--gold-deep);}
+  .category-block{margin-bottom:16px;}
+  .category-label{
+    font-family:'IBM Plex Mono', monospace; font-size:11px; font-weight:600;
+    text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-soft);
+    margin-bottom:8px; display:block;
+  }
+  .chip-row{display:flex; flex-wrap:wrap; gap:8px;}
+  .chip{
+    padding:7px 14px 7px 10px; border-radius:100px; border:2px solid var(--line);
+    background:var(--white); color:var(--ink); font-size:13px; font-weight:600;
+    font-family:'IBM Plex Mono', monospace; cursor:pointer; text-decoration:none;
+    transition:transform .2s cubic-bezier(.34,1.56,.64,1), border-color .2s, background .2s;
+    display:inline-flex; align-items:center; gap:8px;
+  }
+  .chip:hover{transform:translateY(-2px); border-color:var(--gold); background:var(--gold-pale);}
+  .chip .icon{
+    width:20px; height:20px; border-radius:50%; object-fit:cover;
+    background:var(--gold-pale); flex-shrink:0;
+  }
+  .chip .icon-emoji{font-size:15px; line-height:1; flex-shrink:0;}
+  .search-preview{
+    display:flex; align-items:center; gap:8px; margin-top:-8px; margin-bottom:16px;
+    font-size:12.5px; color:var(--ink-soft); min-height:20px;
+  }
+  .search-preview .icon{width:18px; height:18px; border-radius:50%; object-fit:cover;}
+  .search-preview .icon-emoji{font-size:14px;}
+
   .settings-note{font-size:12.5px; color:var(--ink-soft); line-height:1.5; margin-bottom:18px;}
 
   a:focus-visible, button:focus-visible{outline:3px solid var(--gold); outline-offset:2px;}
@@ -199,16 +240,32 @@
 
       <div class="card">
         <span class="kicker">Charts</span>
-        <h1 style="font-size:22px; margin-bottom:16px;">Live charts</h1>
-        <div class="chart-links">
-          <a class="chart-link" href="https://www.tradingview.com/symbols/XAUUSD/" target="_blank" rel="noopener">
-            <span class="sym">XAU/USD</span>
-            <span class="arrow">Open on TradingView →</span>
-          </a>
-          <a class="chart-link" href="https://www.tradingview.com/symbols/USTEC/" target="_blank" rel="noopener">
-            <span class="sym">USTEC</span>
-            <span class="arrow">Open on TradingView →</span>
-          </a>
+        <h1 style="font-size:22px; margin-bottom:16px;">Look up any symbol</h1>
+        <div class="symbol-search">
+          <input type="text" id="symbolInput" placeholder="e.g. EURUSD, AAPL, BTCUSD" oninput="updatePreview()" onkeydown="if(event.key==='Enter') openSymbol()">
+          <button onclick="openSymbol()">Open chart</button>
+        </div>
+        <div class="search-preview" id="searchPreview"></div>
+
+        <div class="category-block">
+          <span class="category-label">Forex</span>
+          <div class="chip-row" id="chips-forex"></div>
+        </div>
+        <div class="category-block">
+          <span class="category-label">Commodities</span>
+          <div class="chip-row" id="chips-commodities"></div>
+        </div>
+        <div class="category-block">
+          <span class="category-label">Indices</span>
+          <div class="chip-row" id="chips-indices"></div>
+        </div>
+        <div class="category-block">
+          <span class="category-label">Stocks</span>
+          <div class="chip-row" id="chips-stocks"></div>
+        </div>
+        <div class="category-block" style="margin-bottom:0;">
+          <span class="category-label">Crypto</span>
+          <div class="chip-row" id="chips-crypto"></div>
         </div>
       </div>
 
@@ -281,6 +338,83 @@
 
 <script>
   const API = 'https://goldwire-backend-1.onrender.com';
+
+  // Each symbol maps to either a real logo image (stocks via company domain,
+  // crypto via CoinCap's icon set) or an emoji when there's no single "brand"
+  // to show (forex pairs, indices, commodities).
+  const SYMBOLS = {
+    forex: [
+      { sym:'EURUSD', label:'EUR/USD', emoji:'🇪🇺' },
+      { sym:'GBPUSD', label:'GBP/USD', emoji:'🇬🇧' },
+      { sym:'USDJPY', label:'USD/JPY', emoji:'🇯🇵' },
+      { sym:'AUDUSD', label:'AUD/USD', emoji:'🇦🇺' },
+    ],
+    commodities: [
+      { sym:'XAUUSD', label:'XAU/USD', emoji:'🥇' },
+      { sym:'XAGUSD', label:'XAG/USD', emoji:'🥈' },
+      { sym:'USOIL', label:'Crude oil', emoji:'🛢️' },
+    ],
+    indices: [
+      { sym:'USTEC', label:'USTEC', emoji:'💻' },
+      { sym:'SPX500', label:'S&P 500', emoji:'📈' },
+      { sym:'DJI', label:'Dow Jones', emoji:'🏛️' },
+      { sym:'UK100', label:'FTSE 100', emoji:'🇬🇧' },
+    ],
+    stocks: [
+      { sym:'AAPL', label:'Apple', img:'https://logo.clearbit.com/apple.com' },
+      { sym:'TSLA', label:'Tesla', img:'https://logo.clearbit.com/tesla.com' },
+      { sym:'NVDA', label:'Nvidia', img:'https://logo.clearbit.com/nvidia.com' },
+      { sym:'MSFT', label:'Microsoft', img:'https://logo.clearbit.com/microsoft.com' },
+      { sym:'NFLX', label:'Netflix', img:'https://logo.clearbit.com/netflix.com' },
+    ],
+    crypto: [
+      { sym:'BTCUSD', label:'BTC/USD', img:'https://assets.coincap.io/assets/icons/btc@2x.png' },
+      { sym:'ETHUSD', label:'ETH/USD', img:'https://assets.coincap.io/assets/icons/eth@2x.png' },
+      { sym:'SOLUSD', label:'SOL/USD', img:'https://assets.coincap.io/assets/icons/sol@2x.png' },
+    ],
+  };
+  // Lookup table so the search box can also show an icon for known symbols.
+  const SYMBOL_LOOKUP = {};
+  Object.values(SYMBOLS).flat().forEach(s => { SYMBOL_LOOKUP[s.sym] = s; });
+
+  function iconHtml(entry) {
+    if (entry.img) return `<img class="icon" src="${entry.img}" alt="" onerror="this.style.display='none'">`;
+    return `<span class="icon-emoji">${entry.emoji}</span>`;
+  }
+
+  function renderChips() {
+    Object.keys(SYMBOLS).forEach(cat => {
+      const el = document.getElementById('chips-' + cat);
+      if (!el) return;
+      el.innerHTML = SYMBOLS[cat].map(s => `
+        <a class="chip" href="#" onclick="return goSymbol('${s.sym}')">${iconHtml(s)}${s.label}</a>
+      `).join('');
+    });
+  }
+
+  function updatePreview() {
+    const raw = document.getElementById('symbolInput').value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+    const el = document.getElementById('searchPreview');
+    if (!raw) { el.innerHTML = ''; return; }
+    if (SYMBOL_LOOKUP[raw]) {
+      const s = SYMBOL_LOOKUP[raw];
+      el.innerHTML = iconHtml(s) + ' ' + s.label;
+      return;
+    }
+    // Unknown symbol — try a company-logo guess for stock tickers, fall back silently.
+    const guess = `https://logo.clearbit.com/${raw.toLowerCase()}.com`;
+    el.innerHTML = `<img class="icon" src="${guess}" alt="" onerror="this.style.display='none'"> ${raw}`;
+  }
+
+  function goSymbol(sym) {
+    window.open('https://www.tradingview.com/symbols/' + sym + '/', '_blank', 'noopener');
+    return false;
+  }
+  function openSymbol() {
+    const raw = document.getElementById('symbolInput').value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (!raw) return;
+    goSymbol(raw);
+  }
 
   function getToken() { return localStorage.getItem('goldwire_token'); }
   function setToken(t) { localStorage.setItem('goldwire_token', t); }
@@ -407,54 +541,3 @@
     const msgEl = document.getElementById('settingsMsg');
     msgEl.textContent = '';
     msgEl.style.color = 'var(--green)';
-    const body = {
-      ema_fast: Number(document.getElementById('ema_fast').value),
-      ema_slow: Number(document.getElementById('ema_slow').value),
-      rsi_period: Number(document.getElementById('rsi_period').value),
-      rsi_overbought: Number(document.getElementById('rsi_overbought').value),
-      rsi_oversold: Number(document.getElementById('rsi_oversold').value),
-      macd_fast: Number(document.getElementById('macd_fast').value),
-      macd_slow: Number(document.getElementById('macd_slow').value),
-      macd_signal: Number(document.getElementById('macd_signal').value),
-      atr_multiplier: Number(document.getElementById('atr_multiplier').value),
-    };
-    try {
-      const res = await fetch(API + '/api/settings', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + getToken()
-        },
-        body: JSON.stringify(body)
-      });
-      const data = await res.json();
-      if (!res.ok) { msgEl.style.color = 'var(--red)'; msgEl.textContent = data.error || 'Could not save settings'; return; }
-      msgEl.textContent = 'Saved.';
-    } catch (e) {
-      msgEl.style.color = 'var(--red)';
-      msgEl.textContent = 'Network error';
-    }
-  }
-
-  function showApp(user) {
-    document.getElementById('login').style.display = 'none';
-    document.getElementById('signup').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    document.getElementById('logoutBtn').style.display = 'inline-block';
-    document.getElementById('welcomeText').textContent = user.name + ' · ' + user.email;
-    document.getElementById('planBadge').textContent = user.plan;
-    loadSignals();
-    loadSettings();
-  }
-
-  (async function init() {
-    if (getToken()) {
-      const user = await loadMe();
-      if (user) { showApp(user); return; }
-    }
-    document.getElementById('login').style.display = 'block';
-  })();
-</script>
-
-</body>
-</html>

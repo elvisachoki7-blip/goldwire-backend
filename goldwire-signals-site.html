@@ -785,14 +785,9 @@
       document.getElementById('dashboardLink').href = API_BASE + '/dashboard.html';
       showSuccess(plan);
     } catch (err) {
-      // Backend not reachable yet (e.g. not deployed) — fall back to the
-      // Netlify waitlist form so no interest is lost during testing.
-      submitToNetlifyWaitlist(form)
-        .catch(()=>{})
-        .finally(()=>{
-          document.getElementById('dashboardLink').style.display = 'none';
-          showSuccess(plan);
-        });
+      const note = document.getElementById('modalNote');
+      note.textContent = err.message || 'We could not create your account. Please try again shortly.';
+      note.style.color = 'var(--red)';
     }
   }
 </script>
